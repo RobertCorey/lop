@@ -1,19 +1,26 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 /**  @jsxFrag */
-import React, { FC, useEffect, useReducer, useRef, useState } from "react";
-import logo from "./logo.svg";
+import { FC, useReducer } from "react";
 import "./App.css";
-import { Table } from "@chevtek/poker-engine";
+import { Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
 import { css, jsx } from "@emotion/react";
 
 const table = new Table();
-table.sitDown("" + Math.random(), 1000);
-table.sitDown("" + Math.random(), 1000);
-table.sitDown("" + Math.random(), 1000);
+table.sitDown("b1", 1000);
+table.sitDown("b2", 1000);
+table.sitDown("b3", 1000);
+table.sitDown("b4", 1000);
+table.sitDown("h", 1000);
 table.dealCards();
+table.currentActor.callAction();
+table.currentActor.callAction();
+table.currentActor.callAction();
+table.currentActor.callAction();
+table.currentActor.checkAction();
 (window as any).t = table;
+
 const colors = {
   orange: "#dc8564",
   red: "#d76a74",
@@ -48,15 +55,28 @@ const ActionBox = styled.div`
   display: inline-block;
 `;
 
-const column = css`
+const Column = styled.div`
   /* border: solid black 1px; */
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   /* background-color: grey; */
-  height: 100%;
 `;
 
+const PlayerCardContainer = styled.div`
+  display: flex;
+  width: 151px;
+  flex-direction: row;
+  justify-content: space-around;
+`;
+
+const getPlayers = () => table.players.filter((p) => p);
+const totalPot = (() => {
+  const betTotal = table.players.reduce((p, c) => p + (c?.bet || 0), 0);
+  const potTotal = table.pots.reduce((p, c) => p + (c.amount || 0), 0);
+  return betTotal + potTotal;
+})();
+const human = table.players.find((p) => p.id === "h");
 function App() {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   return (
@@ -69,34 +89,49 @@ function App() {
             flex-direction: row;
           `}
         >
-          <div
+          <Column
             css={css`
-              ${column};
-              width: 40%;
-            `}
-          >
-            {new Array(5).fill(0).map((_, index) => (
-              <PlayerBox isPlayer={index === 4 ? true : false}></PlayerBox>
-            ))}
-          </div>
-          <div
-            css={css`
-              ${column};
-              width: 10%;
-            `}
-          ></div>
-          <div
-            css={css`
-              ${column};
               width: 50%;
             `}
           >
-            <Card rank="8" suit="h" />
-            <Card rank="8" suit="c" />
-            <Card rank="8" suit="s" />
-            <Card rank="8" suit="d" />
-            <Card rank="J" suit="h" />
-          </div>
+            {getPlayers().map((player, index) => {
+              return <PlayerBox player={player}></PlayerBox>;
+            })}
+            <PlayerCardContainer>
+              {human.holeCards.map((c) => (
+                <Card rank={c.rank} suit={c.suit} />
+              ))}
+              <div
+                css={css`
+                  width: 20px;
+                  height: 20px;
+                  visibility: hidden;
+                `}
+              ></div>
+            </PlayerCardContainer>
+          </Column>
+          <Column
+            css={css`
+              width: 50%;
+            `}
+          >
+            <Column
+              css={css`
+                height: 375px;
+              `}
+            >
+              {table.communityCards.map((c) => (
+                <Card rank={c.rank} suit={c.suit} />
+              ))}
+            </Column>
+            <div
+              css={css`
+                font-size: 2rem;
+              `}
+            >
+              {totalPot}
+            </div>
+          </Column>
         </div>
         <div
           css={css`
@@ -121,22 +156,47 @@ function App() {
     </OuterContainer>
   );
 }
-const Action: FC = () => {
-  return <ActionBox />;
-};
-const PlayerBox: FC<{ isPlayer: boolean }> = ({ isPlayer }) => {
+const PlayerBox: FC<{ player: Player }> = ({ player }) => {
+  const isPlayer = player.id === "h";
+  const isDealer = table.dealer.id === player.id;
   return (
     <div
       css={css`
-        border: solid black 2px;
-        border-radius: 5px;
-        ${!isPlayer && "margin-bottom: 5px"};
-        width: 125px;
-        height: 70px;
-        background-color: ${isPlayer ? colors.medpurple : colors.orange};
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        visibility: ${player.folded && "hidden"};
       `}
     >
-      100<br></br> 10
+      <div
+        css={css`
+          border: solid black 2px;
+          border-radius: 5px;
+          margin-bottom: 5px;
+          width: 125px;
+          height: 70px;
+          background-color: ${isPlayer ? colors.medpurple : colors.orange};
+          margin-right: 5px;
+          text-align: center;
+          font-size: 1.5rem;
+        `}
+      >
+        {player.stackSize}
+        <br></br> {player.bet}
+      </div>
+      <div
+        css={css`
+          width: 20px;
+          height: 20px;
+          border: solid black 1px;
+          border-radius: 50%;
+          background-color: grey;
+          text-align: center;
+          ${!isDealer && "visibility: hidden"}
+        `}
+      >
+        D
+      </div>
     </div>
   );
 };
@@ -151,8 +211,6 @@ const CardContainer = styled.div`
   font-size: 2em;
   margin-bottom: 5px;
 `;
-// /* color: ${color}; */
-// /* border: solid ${color} 2px; */
 
 const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
   rank,

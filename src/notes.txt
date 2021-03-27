@@ -1,2 +1,3 @@
-player cards
-button
+make it so action is always on player
+Actions
+showdown state
