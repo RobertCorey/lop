@@ -1,7 +1,7 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 /**  @jsxFrag */
-import { FC, useReducer } from "react";
+import { FC, useEffect, useReducer } from "react";
 import "./App.css";
 import { Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
@@ -14,11 +14,6 @@ table.sitDown("b3", 1000);
 table.sitDown("b4", 1000);
 table.sitDown("h", 1000);
 table.dealCards();
-table.currentActor.callAction();
-table.currentActor.callAction();
-table.currentActor.callAction();
-table.currentActor.callAction();
-table.currentActor.checkAction();
 (window as any).t = table;
 
 const colors = {
@@ -70,15 +65,29 @@ const PlayerCardContainer = styled.div`
   justify-content: space-around;
 `;
 
-const getPlayers = () => table.players.filter((p) => p);
-const totalPot = (() => {
-  const betTotal = table.players.reduce((p, c) => p + (c?.bet || 0), 0);
-  const potTotal = table.pots.reduce((p, c) => p + (c.amount || 0), 0);
-  return betTotal + potTotal;
-})();
-const human = table.players.find((p) => p.id === "h");
+const doBotActions = () => {
+  while (table.currentActor.id !== "h") {
+    try {
+      table.currentActor.callAction();
+    } catch (error) {
+      table.currentActor.checkAction();
+    }
+  }
+};
 function App() {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
+  useEffect(() => {
+    doBotActions();
+    forceUpdate();
+  }, []);
+
+  const getPlayers = () => table.players.filter((p) => p);
+  const totalPot = (() => {
+    const betTotal = table.players.reduce((p, c) => p + (c?.bet || 0), 0);
+    const potTotal = table.pots.reduce((p, c) => p + (c.amount || 0), 0);
+    return betTotal + potTotal;
+  })();
+  const human = table.players.find((p) => p.id === "h");
   return (
     <OuterContainer>
       <InnerContainer>
@@ -147,7 +156,20 @@ function App() {
               gap: 5px;
             `}
           >
-            {new Array(6).fill(0).map((_, index) => (
+            <ActionBox
+              onClick={() => {
+                try {
+                  table.currentActor.callAction();
+                } catch (error) {
+                  table.currentActor.checkAction();
+                }
+                doBotActions();
+                forceUpdate();
+              }}
+            >
+              Call
+            </ActionBox>
+            {new Array(5).fill(0).map((_, index) => (
               <ActionBox></ActionBox>
             ))}
           </div>
