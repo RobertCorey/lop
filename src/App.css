@@ -6,6 +6,7 @@
 
 html {
   background-color: #eee7f9;
+  user-select: none;
 }
 
 /* Rectangle 1 */
