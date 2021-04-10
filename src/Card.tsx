@@ -9,7 +9,8 @@ const CardContainer = styled.div`
   display: inline-flex;
   width: 60px;
   height: 70px;
-  background: black;
+  background: white;
+  border: solid black 1.5px;
   align-items: center;
   justify-content: center;
   font-size: 2em;
@@ -27,9 +28,9 @@ export const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
       case "h":
         return "#DB162F";
       case "d":
-        return "#F0C808";
+        return "#083ef0";
       case "s":
-        return "#d2d2d2";
+        return "#000000";
     }
   };
   const color = getColor();

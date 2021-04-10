@@ -75,6 +75,19 @@ const doBotActions = () => {
     }
   }
 };
+
+function getPlayerWinnings(player: Player) {
+  if (table.pots.every((p) => p.winners)) {
+    const idToWinnings = table.pots.reduce((p, c) => {
+      const award = c.amount / c.winners!.length;
+      c.winners.forEach((w) => (p[w.id] = p[w.id] ? p[w.id] + award : award));
+      return p;
+    }, {});
+    return idToWinnings[player.id];
+  }
+}
+
+const isHuman = (player: Player) => player.id === "h";
 function App() {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   useEffect(() => {
@@ -105,8 +118,8 @@ function App() {
             `}
           >
             {getPlayers().map((player, index) => {
-              if (table.winners && !player.folded) {
-                return;
+              if (table.winners && !player.folded && !isHuman(player)) {
+                return <Hand cards={player.holeCards}></Hand>;
               }
               return <PlayerBox player={player}></PlayerBox>;
             })}
@@ -193,6 +206,7 @@ function App() {
 const PlayerBox: FC<{ player: Player }> = ({ player }) => {
   const isPlayer = player.id === "h";
   const isDealer = table.dealer.id === player.id;
+  const winnings = getPlayerWinnings(player);
   return (
     <div
       css={css`
@@ -222,14 +236,21 @@ const PlayerBox: FC<{ player: Player }> = ({ player }) => {
         css={css`
           width: 20px;
           height: 20px;
-          border: solid black 1px;
-          border-radius: 50%;
-          background-color: grey;
-          text-align: center;
-          ${!isDealer && "visibility: hidden"}
         `}
       >
-        D
+        {isDealer && (
+          <div
+            css={css`
+              border: solid black 1px;
+              border-radius: 50%;
+              background-color: grey;
+              text-align: center;
+            `}
+          >
+            D
+          </div>
+        )}
+        {winnings}
       </div>
     </div>
   );

@@ -14,17 +14,19 @@ const HandContainer = styled.div`
   justify-content: space-around;
 `;
 
-export const Hand: FC<{ cards: CardType[] }> = ({ cards }) => (
-  <HandContainer>
-    {cards.map((c) => (
-      <Card rank={c.rank} suit={c.suit} />
-    ))}
-    <div
-      css={css`
-        width: 20px;
-        height: 20px;
-        visibility: hidden;
-      `}
-    ></div>
-  </HandContainer>
-);
+export const Hand: FC<{ cards: CardType[] }> = ({ cards }) => {
+  return (
+    <HandContainer>
+      {cards.map((c) => (
+        <Card rank={c.rank} suit={c.suit} />
+      ))}
+      <div
+        css={css`
+          width: 20px;
+          height: 20px;
+          visibility: hidden;
+        `}
+      ></div>
+    </HandContainer>
+  );
+};
