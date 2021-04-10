@@ -1,11 +1,13 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 /**  @jsxFrag */
-import { FC, useEffect, useReducer } from "react";
+import React, { FC, useEffect, useReducer } from "react";
 import "./App.css";
 import { Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
 import { css, jsx } from "@emotion/react";
+import { Card } from "./Card";
+import { Hand } from "./Hand";
 
 const table = new Table();
 table.sitDown("b1", 1000);
@@ -41,13 +43,19 @@ const InnerContainer = styled.div`
   padding: 10px;
 `;
 
-const ActionBox = styled.div`
-  width: 110px;
-  height: 70px;
+const GradientBox = styled.div`
   background: linear-gradient(180deg, #d76a74 0%, rgba(125, 59, 65, 0.3) 100%);
   border: 2px solid #000000;
   border-radius: 4px;
   display: inline-block;
+  text-align: center;
+`;
+
+const ActionBox = styled(GradientBox)`
+  width: 110px;
+  height: 70px;
+  font-size: 28px;
+  line-height: 70px;
 `;
 
 const Column = styled.div`
@@ -58,15 +66,8 @@ const Column = styled.div`
   /* background-color: grey; */
 `;
 
-const PlayerCardContainer = styled.div`
-  display: flex;
-  width: 151px;
-  flex-direction: row;
-  justify-content: space-around;
-`;
-
 const doBotActions = () => {
-  while (table.currentActor.id !== "h") {
+  while (table.currentActor && table.currentActor.id !== "h") {
     try {
       table.currentActor.callAction();
     } catch (error) {
@@ -104,20 +105,12 @@ function App() {
             `}
           >
             {getPlayers().map((player, index) => {
+              if (table.winners && !player.folded) {
+                return;
+              }
               return <PlayerBox player={player}></PlayerBox>;
             })}
-            <PlayerCardContainer>
-              {human.holeCards.map((c) => (
-                <Card rank={c.rank} suit={c.suit} />
-              ))}
-              <div
-                css={css`
-                  width: 20px;
-                  height: 20px;
-                  visibility: hidden;
-                `}
-              ></div>
-            </PlayerCardContainer>
+            <Hand cards={human.holeCards}></Hand>
           </Column>
           <Column
             css={css`
@@ -154,24 +147,43 @@ function App() {
               flex-direction: row;
               flex-wrap: wrap;
               gap: 5px;
+              height: 100%;
             `}
           >
-            <ActionBox
-              onClick={() => {
-                try {
-                  table.currentActor.callAction();
-                } catch (error) {
-                  table.currentActor.checkAction();
-                }
-                doBotActions();
-                forceUpdate();
-              }}
-            >
-              Call
-            </ActionBox>
-            {new Array(5).fill(0).map((_, index) => (
-              <ActionBox></ActionBox>
-            ))}
+            {table.winners ? (
+              <GradientBox
+                css={css`
+                  width: 100%;
+                  height: 100%;
+                  font-size: 108px;
+                `}
+                onClick={() => {
+                  table.dealCards();
+                  forceUpdate();
+                }}
+              >
+                Next
+              </GradientBox>
+            ) : (
+              <>
+                <ActionBox
+                  onClick={() => {
+                    try {
+                      table.currentActor.callAction();
+                    } catch (error) {
+                      table.currentActor.checkAction();
+                    }
+                    doBotActions();
+                    forceUpdate();
+                  }}
+                >
+                  Call
+                </ActionBox>
+                {new Array(5).fill(0).map((_, index) => (
+                  <ActionBox></ActionBox>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </InnerContainer>
@@ -223,42 +235,4 @@ const PlayerBox: FC<{ player: Player }> = ({ player }) => {
   );
 };
 
-const CardContainer = styled.div`
-  display: inline-flex;
-  width: 60px;
-  height: 70px;
-  background: black;
-  align-items: center;
-  justify-content: center;
-  font-size: 2em;
-  margin-bottom: 5px;
-`;
-
-const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
-  rank,
-  suit,
-}) => {
-  const getColor = () => {
-    switch (suit) {
-      case "c":
-        return "#1C7C54";
-      case "h":
-        return "#DB162F";
-      case "d":
-        return "#F0C808";
-      case "s":
-        return "#d2d2d2";
-    }
-  };
-  const color = getColor();
-  return (
-    <CardContainer
-      css={css`
-        color: ${color};
-      `}
-    >
-      <div>{`${rank} ${suit.toUpperCase()}`}</div>
-    </CardContainer>
-  );
-};
 export default App;
