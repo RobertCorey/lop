@@ -10,7 +10,7 @@ import { Card } from "./Card";
 import { Hand } from "./Hand";
 import { getPlayerActions } from "./getPlayerActions";
 
-const table = new Table();
+let table = new Table();
 table.sitDown("b1", 1000);
 table.sitDown("b2", 1000);
 table.sitDown("b3", 1000);
@@ -178,6 +178,20 @@ function App() {
                   font-size: 108px;
                 `}
                 onClick={() => {
+                  const withMoney = table.players.filter(
+                    (p) => p?.stackSize > 0
+                  );
+                  if (
+                    !withMoney.find((p) => isHuman(p)) ||
+                    withMoney.length === 1
+                  ) {
+                    table.players.forEach((p) => p && table.standUp(p.id));
+                    table.sitDown("b1", 1000);
+                    table.sitDown("b2", 1000);
+                    table.sitDown("b3", 1000);
+                    table.sitDown("b4", 1000);
+                    table.sitDown("h", 1000);
+                  }
                   table.dealCards();
                   forceUpdate();
                 }}

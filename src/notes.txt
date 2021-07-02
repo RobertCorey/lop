@@ -1,3 +1,0 @@
-showdown state
-    show bot cards at showdown
-show when people have folded
