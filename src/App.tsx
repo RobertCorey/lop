@@ -70,8 +70,9 @@ const Column = styled.div`
 const doBotActions = () => {
   while (table.currentActor && table.currentActor.id !== "h") {
     try {
+      table.currentActor.foldAction();
       // table.currentActor.foldAction();
-      table.currentActor.callAction();
+      // table.currentActor.callAction();
     } catch (error) {
       table.currentActor.checkAction();
     }
@@ -193,6 +194,7 @@ function App() {
                     table.sitDown("h", 1000);
                   }
                   table.dealCards();
+                  doBotActions();
                   forceUpdate();
                 }}
               >
