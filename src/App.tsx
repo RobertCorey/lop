@@ -3,11 +3,12 @@
 /**  @jsxFrag */
 import React, { FC, useEffect, useReducer } from "react";
 import "./App.css";
-import { Player, Table } from "@chevtek/poker-engine";
+import { BettingRound, Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
 import { css, jsx } from "@emotion/react";
 import { Card } from "./Card";
 import { Hand } from "./Hand";
+import { getPlayerActions } from "./getPlayerActions";
 
 const table = new Table();
 table.sitDown("b1", 1000);
@@ -69,6 +70,7 @@ const Column = styled.div`
 const doBotActions = () => {
   while (table.currentActor && table.currentActor.id !== "h") {
     try {
+      // table.currentActor.foldAction();
       table.currentActor.callAction();
     } catch (error) {
       table.currentActor.checkAction();
@@ -88,6 +90,7 @@ function getPlayerWinnings(player: Player) {
 }
 
 const isHuman = (player: Player) => player.id === "h";
+
 function App() {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   useEffect(() => {
@@ -101,6 +104,9 @@ function App() {
     const potTotal = table.pots.reduce((p, c) => p + (c.amount || 0), 0);
     return betTotal + potTotal;
   })();
+
+  const playerActions = getPlayerActions(table, totalPot);
+
   const human = table.players.find((p) => p.id === "h");
   return (
     <OuterContainer>
@@ -119,7 +125,8 @@ function App() {
           >
             {getPlayers().map((player, index) => {
               if (table.winners && !player.folded && !isHuman(player)) {
-                return <Hand cards={player.holeCards}></Hand>;
+                const winnings = getPlayerWinnings(player);
+                return <Hand cards={player.holeCards} status={winnings}></Hand>;
               }
               return <PlayerBox player={player}></PlayerBox>;
             })}
@@ -179,21 +186,16 @@ function App() {
               </GradientBox>
             ) : (
               <>
-                <ActionBox
-                  onClick={() => {
-                    try {
-                      table.currentActor.callAction();
-                    } catch (error) {
-                      table.currentActor.checkAction();
-                    }
-                    doBotActions();
-                    forceUpdate();
-                  }}
-                >
-                  Call
-                </ActionBox>
-                {new Array(5).fill(0).map((_, index) => (
-                  <ActionBox></ActionBox>
+                {playerActions.map((action) => (
+                  <ActionBox
+                    onClick={() => {
+                      action.action();
+                      doBotActions();
+                      forceUpdate();
+                    }}
+                  >
+                    {action.label}
+                  </ActionBox>
                 ))}
               </>
             )}

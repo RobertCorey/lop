@@ -4,6 +4,7 @@
 import { FC } from "react";
 import { css, jsx } from "@emotion/react";
 import styled from "@emotion/styled";
+import * as Color from "color";
 
 const CardContainer = styled.div`
   display: inline-flex;
@@ -13,7 +14,7 @@ const CardContainer = styled.div`
   border: solid black 1.5px;
   align-items: center;
   justify-content: center;
-  font-size: 2em;
+  font-size: 1.8em;
   margin-bottom: 5px;
 `;
 
@@ -33,14 +34,30 @@ export const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
         return "#000000";
     }
   };
-  const color = getColor();
+  const getSuiteSymbol = () => {
+    switch (suit) {
+      case "c":
+        return "♣";
+      case "h":
+        return "♥";
+      case "d":
+        return "♦";
+      case "s":
+        return "♠";
+    }
+  };
+  const textColor = getColor();
+  const backgroundColor = [...Color(textColor).rgb().color, 0.1].map(
+    (x) => "" + x
+  );
   return (
     <CardContainer
       css={css`
-        color: ${color};
+        color: ${textColor};
+        background: rgba(${backgroundColor.join()});
       `}
     >
-      <div>{`${rank} ${suit.toUpperCase()}`}</div>
+      <div>{`${rank} ${getSuiteSymbol()}`}</div>
     </CardContainer>
   );
 };

@@ -14,7 +14,10 @@ const HandContainer = styled.div`
   justify-content: space-around;
 `;
 
-export const Hand: FC<{ cards: CardType[] }> = ({ cards }) => {
+export const Hand: FC<{ cards: CardType[]; status?: any }> = ({
+  cards,
+  status,
+}) => {
   return (
     <HandContainer>
       {cards.map((c) => (
@@ -24,9 +27,11 @@ export const Hand: FC<{ cards: CardType[] }> = ({ cards }) => {
         css={css`
           width: 20px;
           height: 20px;
-          visibility: hidden;
+          visibility: ${!status && "hidden"};
         `}
-      ></div>
+      >
+        {status}
+      </div>
     </HandContainer>
   );
 };
