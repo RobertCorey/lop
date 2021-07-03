@@ -38,13 +38,13 @@ export const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
   const getSuiteSymbol = () => {
     switch (suit) {
       case "c":
-        return "♣";
+        return "♧";
       case "h":
-        return "♥";
+        return "♡";
       case "d":
-        return "♦";
+        return "♢";
       case "s":
-        return "♠";
+        return "♤";
     }
   };
   const textColor = getColor();
