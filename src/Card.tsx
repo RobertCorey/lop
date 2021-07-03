@@ -14,6 +14,7 @@ const CardContainer = styled.div`
   border: solid black 1.5px;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   font-size: 1.8em;
   margin-bottom: 5px;
 `;
@@ -57,7 +58,8 @@ export const Card: FC<{ rank: string; suit: "s" | "h" | "d" | "c" }> = ({
         background: rgba(${backgroundColor.join()});
       `}
     >
-      <div>{`${rank} ${getSuiteSymbol()}`}</div>
+      <div>{`${rank} `}</div>
+      <div>{getSuiteSymbol()}</div>
     </CardContainer>
   );
 };

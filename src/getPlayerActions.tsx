@@ -25,10 +25,9 @@ export const getPlayerActions = (
     );
   };
   const actions = [
-    totalPot * 0.33 + currentBet,
-    totalPot * 0.66 + currentBet,
-    totalPot + currentBet,
-    totalPot * 1.5 + currentBet,
+    totalPot * 0.4 + currentBet,
+    totalPot * 0.8 + currentBet,
+    totalPot * 1 + currentBet,
   ]
     .map(Math.floor)
     .filter((bet) => isValidAction(bet))
@@ -41,13 +40,21 @@ export const getPlayerActions = (
   return [
     {
       action: () => {
-        try {
+        currentActor.foldAction();
+      },
+      label: "fold",
+    },
+    {
+      action: () => {
+        if (currentActor.legalActions().find((x) => x === "call")) {
           table.currentActor.callAction();
-        } catch (error) {
+        } else {
           table.currentActor.checkAction();
         }
       },
-      label: "c/c",
+      label: currentActor.legalActions().find((x) => x === "call")
+        ? "call"
+        : "check",
     },
     ...actions,
     {
@@ -56,5 +63,5 @@ export const getPlayerActions = (
       },
       label: currentActor.stackSize,
     },
-  ];
+  ].filter((x) => !!x);
 };

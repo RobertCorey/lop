@@ -9,6 +9,7 @@ import { css, jsx } from "@emotion/react";
 import { Card } from "./Card";
 import { Hand } from "./Hand";
 import { getPlayerActions } from "./getPlayerActions";
+import { getBotAction } from "./getBotAction";
 
 let table = new Table();
 table.sitDown("b1", 1000);
@@ -69,13 +70,8 @@ const Column = styled.div`
 
 const doBotActions = () => {
   while (table.currentActor && table.currentActor.id !== "h") {
-    try {
-      table.currentActor.foldAction();
-      // table.currentActor.foldAction();
-      // table.currentActor.callAction();
-    } catch (error) {
-      table.currentActor.checkAction();
-    }
+    const botAction = getBotAction(table);
+    botAction();
   }
 };
 
@@ -93,7 +89,15 @@ function getPlayerWinnings(player: Player) {
 const isHuman = (player: Player) => player.id === "h";
 
 function App() {
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [ignored, forceUpdate] = useReducer((x) => {
+    const cc = table.communityCards.map(({ rank, value, suit }) => ({
+      rank,
+      value,
+      suit,
+    }));
+    console.log(cc);
+    return x + 1;
+  }, 0);
   useEffect(() => {
     doBotActions();
     forceUpdate();
@@ -108,7 +112,7 @@ function App() {
 
   const playerActions = getPlayerActions(table, totalPot);
 
-  const human = table.players.find((p) => p.id === "h");
+  const human = table.players.find((p) => p && p.id === "h");
   return (
     <OuterContainer>
       <InnerContainer>
