@@ -1,4 +1,4 @@
-import { BettingRound, Table } from "@chevtek/poker-engine";
+import { Table } from "@chevtek/poker-engine";
 
 type PlayerAction = {
   action: () => void;
@@ -9,9 +9,8 @@ export const getPlayerActions = (
   table: Table,
   totalPot: number
 ): PlayerAction[] => {
-  let { currentRound, currentActor, currentBet } = table;
+  let { currentActor, currentBet } = table;
   if (!currentActor) return [];
-  let { stackSize } = currentActor;
   currentBet = currentBet || 0;
   const isValidAction = (amount: number) => {
     const currentBet = table.currentBet || 0;
@@ -30,11 +29,21 @@ export const getPlayerActions = (
     totalPot * 1 + currentBet,
   ]
     .map(Math.floor)
-    .filter((bet) => isValidAction(bet))
+    .filter((bet) => {
+      const legalActions = currentActor.legalActions();
+      if (!legalActions.includes("raise") && !legalActions.includes("bet")) {
+        return false;
+      }
+      return isValidAction(bet) && bet <= currentActor.stackSize;
+    })
     .map((bet) => ({
       label: bet + currentBet,
       action: () => {
-        currentActor.raiseAction(bet);
+        try {
+          currentActor.betAction(bet);
+        } catch (error) {
+          currentActor.raiseAction(bet);
+        }
       },
     }));
   return [
@@ -53,15 +62,23 @@ export const getPlayerActions = (
         }
       },
       label: currentActor.legalActions().find((x) => x === "call")
-        ? "call"
-        : "check",
+        ? table.currentBet
+        : "0",
     },
     ...actions,
-    {
-      action: () => {
-        currentActor.raiseAction(currentActor.stackSize);
-      },
-      label: currentActor.stackSize,
-    },
+    ...(() => {
+      const legalActions = currentActor.legalActions();
+      if (!legalActions.includes("raise") && !legalActions.includes("bet")) {
+        return [];
+      }
+      return [
+        {
+          action: () => {
+            currentActor.raiseAction(currentActor.stackSize);
+          },
+          label: currentActor.stackSize,
+        },
+      ];
+    })(),
   ].filter((x) => !!x);
 };

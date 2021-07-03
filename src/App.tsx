@@ -3,9 +3,9 @@
 /**  @jsxFrag */
 import React, { FC, useEffect, useReducer } from "react";
 import "./App.css";
-import { BettingRound, Player, Table } from "@chevtek/poker-engine";
+import { Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
-import { css, jsx } from "@emotion/react";
+import { css } from "@emotion/react";
 import { Card } from "./Card";
 import { Hand } from "./Hand";
 import { getPlayerActions } from "./getPlayerActions";
@@ -71,7 +71,11 @@ const Column = styled.div`
 const doBotActions = () => {
   while (table.currentActor && table.currentActor.id !== "h") {
     const botAction = getBotAction(table);
-    botAction();
+    try {
+      botAction();
+    } catch (error) {
+      table.currentActor.foldAction();
+    }
   }
 };
 
@@ -89,7 +93,7 @@ function getPlayerWinnings(player: Player) {
 const isHuman = (player: Player) => player.id === "h";
 
 function App() {
-  const [ignored, forceUpdate] = useReducer((x) => {
+  const [, forceUpdate] = useReducer((x) => {
     const cc = table.communityCards.map(({ rank, value, suit }) => ({
       rank,
       value,

@@ -1,2 +1,1 @@
-make card symbols vertical vertical
-wire in bot actions
+make sure bets never overflow
