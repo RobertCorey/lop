@@ -6,7 +6,13 @@ export const getBotAction = (table: Table) => {
   var action = items[Math.floor(Math.random() * items.length)];
   switch (action) {
     case "fold":
-      return () => currentActor.foldAction();
+      return () => {
+        try {
+          currentActor.checkAction();
+        } catch (error) {
+          return currentActor.foldAction();
+        }
+      };
     case "bet":
       return () =>
         currentActor.betAction(
@@ -23,7 +29,7 @@ export const getBotAction = (table: Table) => {
         );
       };
     case "check":
-      return () => currentActor.foldAction();
+      return () => currentActor.checkAction();
     case "call":
       return () => currentActor.callAction();
   }
