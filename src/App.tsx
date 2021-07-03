@@ -5,7 +5,8 @@ import React, { FC, useEffect, useReducer } from "react";
 import "./App.css";
 import { Player, Table } from "@chevtek/poker-engine";
 import styled from "@emotion/styled";
-import { css } from "@emotion/react";
+// tslint:disable-next-line
+import { css, jsx } from "@emotion/react";
 import { Card } from "./Card";
 import { Hand } from "./Hand";
 import { getPlayerActions } from "./getPlayerActions";
