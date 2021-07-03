@@ -1,1 +1,1 @@
-Lofi Poker Game
+Lofi Vertical Poker Game
