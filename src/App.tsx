@@ -11,6 +11,7 @@ import { Card } from "./Card";
 import { Hand } from "./Hand";
 import { getPlayerActions } from "./getPlayerActions";
 import { getBotAction } from "./getBotAction";
+import LogRocket from "logrocket";
 
 let table = new Table();
 table.sitDown("b1", 1000);
@@ -106,6 +107,7 @@ function App() {
   useEffect(() => {
     doBotActions();
     forceUpdate();
+    LogRocket.init("67ene9/lofi-poker");
   }, []);
 
   const getPlayers = () => table.players.filter((p) => p);
